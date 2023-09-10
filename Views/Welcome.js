@@ -1,56 +1,117 @@
-import React from 'react';
-import {Text, View, TouchableOpacity, FlatList, Dimensions, Image} from 'react-native';
+import React, {useState} from 'react';
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  FlatList,
+  Dimensions,
+  Image,
+  ImageBackground,
+} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+
 export default function Welcome({navigation}) {
-  const arr = [1, 2, 3, 4, 5, 6];
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const backgroundData = [
+    {
+      uri: 'https://haycafe.vn/wp-content/uploads/2022/01/Hinh-nen-toi-cho-dien-thoai-dep-nhat.jpg',
+    },
+    {
+      uri: 'https://inkythuatso.com/uploads/thumbnails/800/2022/05/1-hinh-nen-dien-thoai-binh-yen-inkythuatso-18-16-16-38.jpg',
+    },
+    {
+      uri: 'https://static.chotot.com/storage/chotot-kinhnghiem/c2c/2023/01/b35d1aa9-hinh-nen-dien-thoai-may-man-cho-menh-moc-7.jpg',
+    },
+  ];
   const renderItem = ({item, index}) => {
+    const isCurrentImage = currentImageIndex;
     return (
       <View
-        style={[
-          index % 2 == 0 ? {backgroundColor: 'blue'} : {backgroundColor: 'red'},
-          {flex: 1, height: Dimensions.get('window').height-56},
-        ]}>
-        <Image source={index % 2 == 0 ? {uri:"https://cdn.sforum.vn/sforum/wp-content/uploads/2023/04/hinh-nen-dien-thoai-4k-1-1.jpg"}
-      :{uri:"https://i.pinimg.com/564x/cd/fe/dd/cdfedd217ee53876c87fa3481b02f1e6.jpg"}  
-      } style={{
-          height:Dimensions.get('window').height-56,
-        }}/>
+        style={{
+          height: Dimensions.get('window').height,
+          width: Dimensions.get('window').width,
+          backgroundColor: 'red',
+        }}>
+        <ImageBackground source={{uri: item.uri}} style={{flex: 1}}>
+          <View style={{flex: 60}}></View>
+          <View
+            style={{
+              flex: 10,
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: '',
+            }}>
+            <View
+              style={{
+                backgroundColor: isCurrentImage == 0 ? 'green' : 'red',
+                height: 15,
+                width: 15,
+                borderRadius: 25,
+                borderWidth: 1,
+                borderColor: 'white',
+              }}
+            />
+            <View
+              style={{
+                backgroundColor: isCurrentImage == 1 ? 'green' : 'red',
+                height: 15,
+                width: 15,
+                borderRadius: 25,
+                borderWidth: 1,
+                borderColor: 'white',
+              }}
+            />
+            <View
+              style={{
+                backgroundColor: isCurrentImage == 2 ? 'green' : 'red',
+                height: 15,
+                width: 15,
+                borderRadius: 25,
+                borderWidth: 1,
+                borderColor: 'white',
+              }}
+            />
+          </View>
+          <View
+            style={{
+              flex: 30,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <TouchableOpacity
+              style={{
+                height: 50,
+                width: 200,
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection:'row'
+              }}>
+              <Text style={{}}>Tiếp tục</Text>
+            </TouchableOpacity>
+          </View>
+        </ImageBackground>
       </View>
     );
   };
   return (
-    // <View>
-    //   <TouchableOpacity
-    //     style={{backgroundColor: 'blue'}}
-    //     onPress={() => {
-    //       navigation.navigate('Home');
-    //     }}>
-    //     <Text style={{color: 'red'}}>Home</Text>
-    //   </TouchableOpacity>
-    //   <TouchableOpacity style={{backgroundColor:'red'}}
-    //   onPress={()=>{
-    //     navigation.goBack()
-    //   }}>
-    //     <Text>go back</Text>
-    //   </TouchableOpacity>
-    // </View>
-    <View style={{backgroundColor: 'red', flex: 1, height: '100%'}}>
+    <View style={{flex: 1}}>
       <FlatList
-        data={arr}
+        data={backgroundData}
+        keyExtractor={item => item.uri}
         renderItem={renderItem}
+        horizontal
         pagingEnabled
-        keyExtractor={item => item}
-        decelerationRate={"normal"}
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
+        onMomentumScrollEnd={event => {
+          const offsetX = event.nativeEvent.contentOffset.x;
+          const newIndex = Math.floor(
+            (offsetX + 100) / Dimensions.get('window').width,
+          );
+          setCurrentImageIndex(newIndex);
+        }}
       />
-      <TouchableOpacity style={{height:100,backgroundColor:'white'}} 
-      onPress={()=>{
-        navigation.navigate("Login")
-      }}>
-        <Text style={{color:'black'}}>Login</Text>
-      </TouchableOpacity>
     </View>
   );
 }
