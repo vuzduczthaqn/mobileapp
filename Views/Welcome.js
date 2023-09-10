@@ -7,6 +7,7 @@ import {
   Dimensions,
   Image,
   ImageBackground,
+  StyleSheet,
 } from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -37,59 +38,10 @@ export default function Welcome({navigation}) {
           <View style={{flex: 60}}></View>
           <View
             style={{
-              flex: 10,
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: '',
-            }}>
-            <View
-              style={{
-                backgroundColor: isCurrentImage == 0 ? 'green' : 'red',
-                height: 15,
-                width: 15,
-                borderRadius: 25,
-                borderWidth: 1,
-                borderColor: 'white',
-              }}
-            />
-            <View
-              style={{
-                backgroundColor: isCurrentImage == 1 ? 'green' : 'red',
-                height: 15,
-                width: 15,
-                borderRadius: 25,
-                borderWidth: 1,
-                borderColor: 'white',
-              }}
-            />
-            <View
-              style={{
-                backgroundColor: isCurrentImage == 2 ? 'green' : 'red',
-                height: 15,
-                width: 15,
-                borderRadius: 25,
-                borderWidth: 1,
-                borderColor: 'white',
-              }}
-            />
-          </View>
-          <View
-            style={{
               flex: 30,
               justifyContent: 'center',
               alignItems: 'center',
-            }}>
-            <TouchableOpacity
-              style={{
-                height: 50,
-                width: 200,
-                justifyContent: 'center',
-                alignItems: 'center',
-                flexDirection:'row'
-              }}>
-              <Text style={{}}>Tiếp tục</Text>
-            </TouchableOpacity>
-          </View>
+            }}></View>
         </ImageBackground>
       </View>
     );
@@ -112,6 +64,71 @@ export default function Welcome({navigation}) {
           setCurrentImageIndex(newIndex);
         }}
       />
+      <View
+        style={styles.boxIconChangePage}>
+        <View
+          style={[
+            {
+              backgroundColor:
+                currentImageIndex == 0 ? 'white' : 'rgba(0, 0, 0, 0)',
+            },
+            styles.iconChangepage,
+          ]}
+        />
+        <View
+          style={[
+            {
+              backgroundColor:
+                currentImageIndex == 1 ? 'white' : 'rgba(0, 0, 0, 0)',
+            },
+            styles.iconChangepage,
+          ]}
+        />
+        <View
+          style={[
+            {
+              backgroundColor:
+                currentImageIndex == 2 ? 'white' : 'rgba(0, 0, 0, 0)',
+            },
+            styles.iconChangepage,
+          ]}
+        />
+      </View>
+      <TouchableOpacity style={styles.buttonNextPage}
+      onPress={()=>{
+        navigation.navigate('Choise')
+      }}>
+        <Text style={{color: 'white', fontSize: 16}}>Tiếp tục</Text>
+      </TouchableOpacity>
     </View>
   );
 }
+const styles = StyleSheet.create({
+  buttonNextPage: {
+    height: 50,
+    width: Dimensions.get('window').width * 0.6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    position: 'absolute',
+    backgroundColor: '#69a1fa',
+    bottom: Dimensions.get('window').height * 0.15,
+    left: Dimensions.get('window').width * 0.2,
+    borderRadius:15,
+  },
+  iconChangepage: {
+    height: 10,
+    width: 10,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: 'white',
+  },
+  boxIconChangePage:{
+    width: Dimensions.get('window').width * 0.2,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    position: 'absolute',
+    bottom: Dimensions.get('window').height * 0.25,
+    left: Dimensions.get('window').width * 0.4,
+  }
+});
