@@ -19,7 +19,7 @@ export default function App() {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Message" component={Message} />
         <Stack.Screen name="Profile" component={Profile} />
-        <Stack.Screen name="Reagister" component={Register} />
+        <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="Search" component={Search} />
         <Stack.Screen name="Welcome" component={Welcome} />
       </Stack.Navigator>
