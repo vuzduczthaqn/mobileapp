@@ -25,7 +25,7 @@ export default function App() {
     <GlobalState>
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName="BottomTab"
+          initialRouteName="Welcome"
           screenOptions={{headerShown: false}}>
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="Choise" component={Choise} />

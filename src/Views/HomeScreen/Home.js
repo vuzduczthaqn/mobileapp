@@ -43,7 +43,7 @@ export default function Home() {
       userIdCreatePost: jsonData.userIdCreatePost,
       amountComment: jsonData.amountComment,
       isLikePost: jsonData.isLikePost,
-      isAmountLike:jsonData.AmountLike
+      isAmountLike:jsonData.amountLike
     };
   };
   const loadDataFromDB = () => {
@@ -138,13 +138,26 @@ export default function Home() {
             </TouchableOpacity>
           </View>
           <View
-            style={styles.AddNewPost}>
+            style={[styles.AddNewPost,{marginRight:7.5}]}>
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate('Search');
               }}>
               <FontAwesome5
                 name="search"
+                size={20}
+                color={color.home_color_text}
+              />
+            </TouchableOpacity>
+          </View>
+          <View
+            style={styles.AddNewPost}>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('Search');
+              }}>
+              <FontAwesome5
+                name="bell"
                 size={20}
                 color={color.home_color_text}
               />

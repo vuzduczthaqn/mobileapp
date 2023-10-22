@@ -39,7 +39,7 @@ export default function Login() {
         email: email,
         pass: password,
       };
-      const response = await axios.post(url, requestData);
+      const response = await axios.get(url, requestData);
       const responseData = response.data;
       if (responseData != null && responseData.length !== 0) {
         navigation.navigate('Home');

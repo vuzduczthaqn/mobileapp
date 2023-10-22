@@ -1,4 +1,4 @@
-const url='http://10.0.60.156:8989/'
+const url='http://192.168.31.214:8989/'
 const socket="ws://192.168.31.214:8989/ws"
 export default{
     get_post_data_home:url+'get-post-data',

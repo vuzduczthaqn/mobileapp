@@ -111,10 +111,10 @@ const PostItem = ({item, showContent}) => {
         </View>
         {item.postLike != 0 && item.amountComment != 0 && (
           <View style={{paddingHorizontal: 10}}>
-            {item.AmountLike != 0 && (
+            {item.isAmountLike != 0 && (
               <TouchableOpacity>
                 <Text style={{color: color.home_color_text}}>
-                  {item.AmountLike} lượt thích
+                  {item.isAmountLike} lượt thích
                 </Text>
               </TouchableOpacity>
             )}

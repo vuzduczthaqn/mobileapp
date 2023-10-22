@@ -47,6 +47,20 @@ export default function () {
           }}
         />
         <Tab.Screen
+          name="Message"
+          component={Chats}
+          options={{
+            headerShown: false,
+            tabBarIcon: ({focused}) => (
+              <Icon
+                name="facebook-messenger"
+                size={25}
+                color={focused ? 'blue' : 'black'}
+              />
+            ),
+          }}
+        />
+        {/* <Tab.Screen
           name="Đăng bài"
           component={NewPost}
           listeners={({navigation}) => ({
@@ -65,28 +79,14 @@ export default function () {
           options={{
             headerShown: false,
             tabBarIcon: ({focused}) => (
-              <FontAwesome5
-                name="edit"
+              <Icon
+                name="bell"
                 size={26}
                 color={focused ? 'black' : 'black'}
               />
             ),
           }}
-        />
-        <Tab.Screen
-          name="Message"
-          component={Chats}
-          options={{
-            headerShown: false,
-            tabBarIcon: ({focused}) => (
-              <Icon
-                name="facebook-messenger"
-                size={25}
-                color={focused ? 'blue' : 'black'}
-              />
-            ),
-          }}
-        />
+        /> */}
         <Tab.Screen
           name="Profile"
           component={Profile}
