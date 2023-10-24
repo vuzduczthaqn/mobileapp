@@ -19,13 +19,14 @@ import PostNews from './PostNews';
 import Friend from './Friend';
 import test from './test';
 import Setting from './Setting';
+import SplashScreen from './SplashScreen';
 const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <GlobalState>
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName="Welcome"
+          initialRouteName="SplashScreen"
           screenOptions={{headerShown: false}}>
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="Choise" component={Choise} />
@@ -41,10 +42,11 @@ export default function App() {
           <Stack.Screen name="ChatItems" component={ChatItems} />
           <Stack.Screen name="Messages" component={Message} />
           <Stack.Screen name="MessageItem" component={MessageItem} />
-          <Stack.Screen name='PostNews' component={PostNews}/>
-          <Stack.Screen name='Friend' component={Friend}/>
-          <Stack.Screen name='Setting' component={Setting}/>
-          <Stack.Screen name='test' component={test}/>
+          <Stack.Screen name="PostNews" component={PostNews} />
+          <Stack.Screen name="Friend" component={Friend} />
+          <Stack.Screen name="Setting" component={Setting} />
+          <Stack.Screen name="test" component={test} />
+          <Stack.Screen name="SplashScreen" component={SplashScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </GlobalState>

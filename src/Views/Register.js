@@ -1,11 +1,12 @@
 import {useNavigation} from '@react-navigation/native';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Image,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -287,7 +288,7 @@ export default function Register() {
             }}>
             Already have an account?
           </Text>
-          <Pressable onPress={onPress}>
+          {/* <Pressable onPress={onPress}>
             <Text
               style={{
                 fontSize: 16,
@@ -297,7 +298,7 @@ export default function Register() {
               }}>
               To login
             </Text>
-          </Pressable>
+          </Pressable> */}
         </View>
         {/*  */}
         <View
@@ -333,7 +334,6 @@ export default function Register() {
             marginBottom: 40,
           }}>
           <TouchableOpacity
-            onPress={onPress}
             style={{
               flex: 1,
               alignItems: 'center',
@@ -356,7 +356,6 @@ export default function Register() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={onPress}
             style={{
               flex: 1,
               alignItems: 'center',

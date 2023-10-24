@@ -20,52 +20,83 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ImageApp} from '../constants';
 import {urlLogin} from '../utils/ipConfig';
 import {GlobalContext} from '../context';
+import jwtDecode from 'jwt-decode';
+import {AsyncStorageItem, url} from '../url_request';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function Login() {
-  const {showLoginScreens, setShowLoginScreens} = useContext(GlobalContext);
   const [keyboardIsShow, setKeyboardIsShow] = useState(false);
   const navigation = useNavigation();
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(true);
-  const [email, setEmail] = useState('');
-  const [acessEmail, setAcessEmail] = useState(true);
+  const [userName, setUserName] = useState('');
+  const [acessUserName, setAcessUserName] = useState(true);
   const [acessPass, setAcessPass] = useState(true);
-  const url = 'http://192.168.160.148:8888/login';
+  const {user, setUser} = useContext(GlobalContext);
   const acessLogin = () => {
-    if (acessEmail && acessPass) return true;
+    if (acessUserName && acessPass) return true;
+    else return false;
   };
   const checkLogin = async () => {
     try {
       const requestData = {
-        email: email,
-        pass: password,
+        userName: userName.toString(),
+        passWord: password.toString(),
       };
-      const response = await axios.get(url, requestData);
-      const responseData = response.data;
-      if (responseData != null && responseData.length !== 0) {
-        navigation.navigate('Home');
-      } else {
-        Alert.alert('Email hoặc mật khẩu không đúng');
-        setEmail('');
-        setPassword('');
+      const formData = new FormData();
+      formData.append('userName', userName);
+      formData.append('passWord', password);
+
+      const response = await axios.post(url.login, formData);
+      if (response.status === 200) {
+        if (response.data.status === true) {
+          try {
+            await AsyncStorage.setItem(
+              AsyncStorageItem.jwtUser,
+              response.data.jwtToken,
+            );
+          } catch (error) {
+            console.log(error);
+          }
+          const jwtToken = await AsyncStorage.getItem(AsyncStorageItem.jwtUser);
+          const decode = jwtDecode(jwtToken);
+          console.log(jwtToken)
+          console.log(decode.sub);
+          console.log(decode.userName);
+          console.log(decode.urlAvata)
+          setUser({
+            userId: decode.sub,
+            userName: decode.userName,
+            urlAvata: decode.urlAvata,
+          });
+          navigation.navigate('BottomTab');
+        } else {
+          Alert.alert('UserName hoặc mật khẩu không đúng');
+          setUserName('');
+          setPassword('');
+        }
       }
     } catch (error) {
       console.log(error);
     }
   };
   useEffect(() => {
-    if (email.length > 0) {validateEmail()};
+    if (userName.length > 0) {
+      validateUserName();
+    }
     if (password.length > 0) validatePass();
-  }, [email]);
-  const validateEmail = () => {
-    if (email.length < 3) {
-      setAcessEmail(false);
+  }, [userName, password]);
+  const validateUserName = () => {
+    if (userName.length < 3) {
+      setAcessUserName(false);
     } else {
-      setAcessEmail(true);
+      setAcessUserName(true);
     }
   };
   const validatePass = () => {
     if (password.length <= 3) {
       setAcessPass(false);
+    } else {
+      setAcessPass(true);
     }
   };
   useEffect(() => {
@@ -144,18 +175,18 @@ export default function Login() {
             }>
             {/* Ô nhập gmail */}
             <View style={styles.stlBoxInput}>
-              <Icon name="gmail" size={20} color={'black'} />
+              <Icon name="account-circle-outline" size={25} color={'black'} />
               <TextInput
                 style={styles.stlTextInput}
-                placeholder="Email"
+                placeholder="Tên đăng nhập "
                 placeholderTextColor={'#84c2f5'}
                 onChangeText={text => {
-                  setEmail(text);
-                  validateEmail();
+                  setUserName(text);
+                  validateUserName();
                 }}
               />
             </View>
-            {acessEmail == false && (
+            {acessUserName == false && (
               <View
                 style={
                   keyboardIsShow == false
@@ -178,7 +209,7 @@ export default function Login() {
             {/* Ô nhập mật khẩu */}
             <View>
               <View style={styles.stlBoxInput}>
-                <Icon name="lock" size={20} color={'black'} />
+                <Icon name="lock-outline" size={25} color={'black'} />
                 <TextInput
                   style={styles.stlTextInput}
                   placeholder="Mật khẩu"
@@ -241,10 +272,10 @@ export default function Login() {
             <TouchableOpacity
               style={styles.stlButtonLogin}
               onPress={() => {
-                validateEmail();
+                validateUserName();
                 validatePass();
-                if (acessLogin == true) {
-                  checkLogin;
+                if (acessLogin() == true) {
+                  checkLogin();
                 }
               }}>
               <Text

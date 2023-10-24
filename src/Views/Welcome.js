@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Text,
   View,
@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Welcome({navigation}) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -46,6 +47,7 @@ export default function Welcome({navigation}) {
       </View>
     );
   };
+
   return (
     <View style={{flex: 1}}>
       <FlatList

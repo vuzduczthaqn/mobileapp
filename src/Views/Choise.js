@@ -18,9 +18,9 @@ export default function Choise() {
   return (
     <View style={styles.container}>
       <View style={styles.backButton}>
-        <TouchableOpacity onPress={() => navigation.navigate('Welcome')}>
+        {/* <TouchableOpacity onPress={() => navigation.navigate('Welcome')}>
           <Icon name="arrow-left" color="black" size={25}></Icon>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       <View style={styles.titleContainer}>
         <ImageBackground

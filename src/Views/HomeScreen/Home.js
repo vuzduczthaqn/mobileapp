@@ -6,31 +6,29 @@ import {
   TouchableOpacity,
   View,
   Image,
+  Alert,
 } from 'react-native';
 import Comment from './Comment';
 import styles from './Home.styles';
 import {useNavigation} from '@react-navigation/native';
 import {GestureHandlerRootView, TextInput} from 'react-native-gesture-handler';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import {url} from '../../url_request';
+import {AsyncStorageItem, url} from '../../url_request';
 import axios from 'axios';
 import {Stomp} from '@stomp/stompjs';
 import {color} from '../../constants';
 import PostItem from './HomePostItem';
-import { GlobalContext } from '../../context';
-// import { createDrawerNavigator } from '@react-navigation/drawer';
-// const drawer=createDrawerNavigator();
+import {GlobalContext} from '../../context';
 export default function Home() {
-  const navigation = useNavigation();;
+  const navigation = useNavigation();
   const [showContent, setShowContent] = useState(false);
   const [isHeaderVisible, setHeaderVisible] = useState(true);
   const [pageCurrent, setPageCurrent] = useState(0);
   const [dataFromDB, setDataFromDB] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEndOfData, setIsEndOfData] = useState(false);
-  const {setShowCommentScreen,showCommentScreen} =useContext(GlobalContext);
-
-
+  const {setShowCommentScreen, showCommentScreen} = useContext(GlobalContext);
+  const { user, setUser } = useContext(GlobalContext);
   const parseData = jsonData => {
     return {
       id: jsonData.idPost,
@@ -43,12 +41,12 @@ export default function Home() {
       userIdCreatePost: jsonData.userIdCreatePost,
       amountComment: jsonData.amountComment,
       isLikePost: jsonData.isLikePost,
-      isAmountLike:jsonData.amountLike
+      isAmountLike: jsonData.amountLike,
     };
   };
   const loadDataFromDB = () => {
     const requestData = {
-      userId: '1',
+      userId: user.userId,
       pageCurrent: pageCurrent,
     };
     console.log(url.get_post_data_home);
@@ -72,7 +70,6 @@ export default function Home() {
               response.status,
             );
           }
-          
         });
     } catch (error) {
       console.log('Lỗi:', error);
@@ -97,13 +94,9 @@ export default function Home() {
     setIsEndOfData(false);
     loadDataFromDB();
   }, [pageCurrent]);
+
   const renderItem = ({item, index}) => {
-    return (
-      <PostItem
-        item={item}
-        showContent={showContent}
-      />
-    );
+    return <PostItem item={item} showContent={showContent} />;
   };
   return (
     <GestureHandlerRootView style={{flex: 1}}>
@@ -113,8 +106,7 @@ export default function Home() {
           backgroundColor: color.color_background,
           justifyContent: 'center',
         }}>
-        <View
-          style={styles.topHeader}>
+        <View style={styles.topHeader}>
           <Text
             style={{
               fontSize: 24,
@@ -123,9 +115,8 @@ export default function Home() {
             }}>
             Picky
           </Text>
-          <View style={{flex:1}}></View>
-          <View
-            style={[styles.AddNewPost,{marginRight:7.5}]}>
+          <View style={{flex: 1}}></View>
+          <View style={[styles.AddNewPost, {marginRight: 7.5}]}>
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate('PostNews');
@@ -137,8 +128,7 @@ export default function Home() {
               />
             </TouchableOpacity>
           </View>
-          <View
-            style={[styles.AddNewPost,{marginRight:7.5}]}>
+          <View style={[styles.AddNewPost, {marginRight: 7.5}]}>
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate('Search');
@@ -150,8 +140,7 @@ export default function Home() {
               />
             </TouchableOpacity>
           </View>
-          <View
-            style={styles.AddNewPost}>
+          <View style={styles.AddNewPost}>
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate('Search');
@@ -192,7 +181,7 @@ export default function Home() {
         <TouchableOpacity style={{}}>
           <Image
             source={{
-              uri: 'https://randomuser.me/api/portraits/women/76.jpg',
+              uri: user.urlAvata,
             }}
             style={{height: 35, width: 35, borderRadius: 25}}
           />
@@ -211,7 +200,7 @@ export default function Home() {
           onPress={() => {
             navigation.navigate('PostNews');
           }}>
-          <Text style={{color:"#636663"}}>Bạn đang nghĩ gì ?</Text>
+          <Text style={{color: '#636663'}}>Bạn đang nghĩ gì ?</Text>
         </TouchableOpacity>
       </View>
     );
