@@ -2,8 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import {Home} from './HomeScreen';
 import Message from './MessageScreen/Message';
-import Profile from './Profile';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Profile from './Profile/Profile';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import {
   KeyboardAvoidingView,
   SafeAreaView,
@@ -15,47 +15,61 @@ import {
   Keyboard,
   Image,
   FlatList,
+  Alert,
 } from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {useNavigation} from '@react-navigation/native';
 import {BottomTabBar} from '@react-navigation/bottom-tabs';
-import { url } from '../url_request';
+import {url} from '../url_request';
 import axios from 'axios';
 const Drawer = createDrawerNavigator();
 export default function Search() {
   const navigation = useNavigation();
   const [dataFromDB, setDataFromDB] = useState([]);
   const [textSearch, setTextSearch] = useState('');
-  const [pageCurrent,setPageCurrent]=useState('0')
-  const parseData=jsonData=>{
-    return{
-      userId:jsonData.userId,
-      userName:jsonData.userName,
-      urlAvata:jsonData.urlAvata,
-      amountFriend:jsonData.amountFriend,
-      isFriend:jsonData.isFriend,
-    }
-  }
+  const [pageCurrent, setPageCurrent] = useState('0');
+  const [searchIsShow, setSearchIsShow] = useState(true);
+  const parseData = jsonData => {
+    return {
+      userId: jsonData.userId,
+      userName: jsonData.userName,
+      urlAvata: jsonData.urlAvata,
+      amountFriend: jsonData.amountFriend,
+      isFriend: jsonData.isFriend,
+    };
+  };
   const loadDataFromDB = async () => {
     const requestData = {
-      dataSeach:textSearch,
-      currenSearch:pageCurrent,
+      dataSeach: textSearch,
+      currenSearch: pageCurrent,
     };
-    console.log(url.get_data_search)
-    try{
-      axios
-      .get(url.get_data_search,{params:requestData})
-      .then(respone=>{
+    console.log(url.get_data_search);
+    try {
+      axios.get(url.get_data_search, {params: requestData}).then(respone => {
         console.log(respone.data);
-        if(respone.status===200){
-          const parsedDataList=respone.data.map()
+        if (respone.status === 200) {
+          const parsedDataList = respone.data.map();
         }
-      })
-    }catch(Error){
+      });
+    } catch (Error) {
       console.log(Error);
     }
   };
-
+  const iconSearchIsShow=()=>{
+    if (textSearch.toString.lenght > 0) {
+      setSearchIsShow(true);
+    } else {
+      setSearchIsShow(false);
+    }
+  }
+  useEffect(() => {
+    if (textSearch.toString.lenght > 0) {
+      Alert.alert("abh")
+      setSearchIsShow(true);
+    } else {
+      setSearchIsShow(false);
+    }
+  }, [textSearch]);
   return (
     <SafeAreaView style={{backgroundColor: 'white', flex: 1}}>
       <KeyboardAvoidingView style={{flex: 1}}>
@@ -65,7 +79,10 @@ export default function Search() {
               navigation.goBack();
             }}
             style={styles.searchBack}>
-            <Icon name="arrow-left" color="black" size={30}></Icon>
+            <FontAwesome6
+              name="angle-left"
+              color="black"
+              size={30}></FontAwesome6>
           </TouchableOpacity>
           <View
             style={{
@@ -77,18 +94,20 @@ export default function Search() {
             <TextInput
               style={styles.searhInput}
               placeholder="Search"
-              onChangeText={(text) => {
+              placeholderTextColor={'#a7a8a8'}
+              onChangeText={text => {
                 setTextSearch(text);
+                iconSearchIsShow()
               }}
             />
             <View style={{position: 'absolute', top: 12.5, left: 7.5}}>
-              <FontAwesome5 name="search" size={20} color="#b3afaf" />
+                <FontAwesome5 name="search" size={18} color="#b3afaf" />
             </View>
           </View>
           <TouchableOpacity>
             <Text
               style={{
-                color: 'red',
+                color: '#0291f0',
                 fontSize: 16,
                 fontWeight: 500,
                 marginHorizontal: 5,
@@ -153,17 +172,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 10,
     paddingTop: 10,
-    paddingBottom: 10,
+    paddingBottom: 15,
     alignItems: 'center',
-    backgroundColor: 'pink',
+    // backgroundColor: '#e8eaeb',
   },
-  searchBack: {},
+  searchBack: {paddingLeft: 5, paddingRight: 15},
   searhInput: {
-    backgroundColor: '#666565',
+    backgroundColor: '#ededed',
     borderRadius: 15,
     paddingStart: 35,
     paddingVertical: 0,
     height: 40,
+    color: 'black',
+    fontSize:16
+    // borderBottomWidth:1,
+    // borderBottomColor:'black'
   },
   imgeItemRender: {
     height: 50,

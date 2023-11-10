@@ -8,7 +8,7 @@ export default function ChatItems(props) {
       style={{
         height: '10',
         paddingStart: 10,
-        paddingVertical: 12,
+        paddingVertical: 7.5,
       }}>
       <View style={{flexDirection: 'row'}}>
         <View style={{}}>

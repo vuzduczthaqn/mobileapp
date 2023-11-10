@@ -3,7 +3,7 @@ import {Button, Text, TextInput, View} from 'react-native';
 import {Client, Stomp} from '@stomp/stompjs';
 import {url} from '../url_request';
 import {TextEncoder} from 'text-encoding';
-import { measure } from 'react-native-reanimated';
+import {measure} from 'react-native-reanimated';
 
 export default function SocketAPI() {
   const [inputMessage, setInputMessage] = useState('');
@@ -30,9 +30,20 @@ export default function SocketAPI() {
         destination: '/app/chat',
         body: JSON.stringify('Vu duc thang'),
       });
-      stompClient.subscribe('/topic/public', message =>{
-        console.log(`Server:${JSON.parse(message.body)}`)}
-      );
+
+      stompClient.subscribe('/topic/public', message => {
+        console.log(`Server:${JSON.parse(message.body)}`);
+      });
+      stompClient.subscribe('/topic/public', message => {
+        console.log(`Server (public): ${JSON.parse(message.body)}`);
+      });
+      stompClient.subscribe('/user/topic/notifications', message => {
+        console.log(`Server (notifications): ${JSON.parse(message.body)}`);
+      });
+
+      stompClient.subscribe('/user/topic/private', message => {
+        console.log(`Server (private): ${JSON.parse(message.body)}`);
+      });
     },
 
     onStompError: frame => {

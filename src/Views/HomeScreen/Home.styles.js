@@ -27,6 +27,8 @@ const styles = StyleSheet.create({
       height: 35,
       width: 35,
       borderRadius: 25,
+      borderWidth:1,
+      backgroundColor:'black'
     },
     profileName: {
       color: color.home_color_text,

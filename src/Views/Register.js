@@ -1,6 +1,7 @@
 import {useNavigation} from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
+  Alert,
   Image,
   SafeAreaView,
   ScrollView,
@@ -12,14 +13,17 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import encryptPassword from '../utils/encrpytPassword';
+import axios from 'axios';
+import { url } from '../url_request';
 export default function Register() {
   const navigation = useNavigation();
   const [isPasswordShown, setIsPasswordShown] = useState(false);
   //    Validate
   const [formData, setFormData] = useState({
     username: '',
+    fullname: '',
     email: '',
-    number: '',
     password: '',
   });
   const [errors, setErrors] = useState({});
@@ -28,16 +32,15 @@ export default function Register() {
     const newErrors = {};
 
     if (!formData.username) {
-      newErrors.username = 'Vui lòng nhập tên người dùng';
+      newErrors.username = 'Vui lòng nhập tên đăng nhập';
     }
 
     if (!formData.email || !formData.email.includes('@')) {
       newErrors.email = 'Email không hợp lệ !';
     }
     //
-    const phonePattern = /^[0-9]{10}$/;
-    if (!formData.number || !phonePattern.test(formData.number)) {
-      newErrors.number = 'Số điện thoại không hợp lệ !';
+    if (!formData.fullname){
+      newErrors.number = 'Tên không được để trống!';
     }
 
     if (formData.password.length < 4) {
@@ -47,10 +50,23 @@ export default function Register() {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      // Dữ liệu hợp lệ, bạn có thể thực hiện đăng ký ở đây
+      register()
     }
   };
-
+const register=async()=>{
+  const form = new FormData()
+  form.append("userName",formData.username)
+  form.append("email",formData.email)
+  form.append("password",encryptPassword(formData.password))
+  form.append("fullname",formData.fullname)
+  console.log(formData)
+  const respone=await axios.post(url.register_account,form);
+  if(respone.status===200)
+  navigation.navigate("Login");
+  else{
+    navigation.navigate("Register")
+  }
+}
   return (
     <SafeAreaView style={{backgroundColor: '#000'}}>
       <ScrollView>
@@ -177,7 +193,7 @@ export default function Register() {
               justifyContent: 'space-between',
               paddingLeft: 32,
             }}>
-            <TextInput
+            {/* <TextInput
               color="#fff"
               placeholder="+84"
               placeholderTextColor="#f5f5dc"
@@ -188,19 +204,18 @@ export default function Register() {
                 borderRightColor: '#f5f5dc',
                 height: '100%',
               }}
-            />
+            /> */}
             <TextInput
               color="#fff"
-              placeholder="Enter your phone Number"
+              placeholder="Enter your full name"
               placeholderTextColor="#f6f6f6"
-              keyboardType="numeric"
-              value={formData.number}
-              onChangeText={text => setFormData({...formData, number: text})}
+              value={formData.fullname}
+              onChangeText={text => setFormData({...formData, fullname: text})}
               style={{width: '80%'}}
             />
           </View>
-          {errors.number && (
-            <Text style={{color: 'red', marginTop: 2}}>{errors.number}</Text>
+          {errors.fullname && (
+            <Text style={{color: 'red', marginTop: 2}}>{errors.fullname}</Text>
           )}
         </View>
         {/* Password */}
@@ -288,17 +303,6 @@ export default function Register() {
             }}>
             Already have an account?
           </Text>
-          {/* <Pressable onPress={onPress}>
-            <Text
-              style={{
-                fontSize: 16,
-                color: '#00ffff',
-                marginLeft: 6,
-                marginTop: 14,
-              }}>
-              To login
-            </Text>
-          </Pressable> */}
         </View>
         {/*  */}
         <View
@@ -347,11 +351,11 @@ export default function Register() {
               marginLeft: 5,
               borderRadius: 10,
             }}>
-            {/* <Image
-              source={require('./image/facebook_480px.png')}
+            <Image
+               source={require('../constants/facebook.png')}
               style={{height: 36, width: 36, marginRight: 8}}
               resizeMode="contain"
-            /> */}
+            />
             <Text style={{color: '#f5f5dc'}}>Facebook</Text>
           </TouchableOpacity>
 
@@ -369,11 +373,11 @@ export default function Register() {
               marginLeft: 5,
               borderRadius: 10,
             }}>
-            {/* <Image
-              source={require('./image/google_480px.png')}
+            <Image
+               source={require('../constants/google.png')}
               style={{height: 36, width: 36, marginRight: 8}}
               resizeMode="contain"
-            /> */}
+            />
             <Text style={{color: '#f5f5dc'}}>Google</Text>
           </TouchableOpacity>
         </View>

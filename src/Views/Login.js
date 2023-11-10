@@ -23,6 +23,7 @@ import {GlobalContext} from '../context';
 import jwtDecode from 'jwt-decode';
 import {AsyncStorageItem, url} from '../url_request';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import encryptPassword from '../utils/encrpytPassword';
 export default function Login() {
   const [keyboardIsShow, setKeyboardIsShow] = useState(false);
   const navigation = useNavigation();
@@ -38,13 +39,9 @@ export default function Login() {
   };
   const checkLogin = async () => {
     try {
-      const requestData = {
-        userName: userName.toString(),
-        passWord: password.toString(),
-      };
       const formData = new FormData();
       formData.append('userName', userName);
-      formData.append('passWord', password);
+      formData.append('passWord', encryptPassword(password));
 
       const response = await axios.post(url.login, formData);
       if (response.status === 200) {
@@ -59,15 +56,19 @@ export default function Login() {
           }
           const jwtToken = await AsyncStorage.getItem(AsyncStorageItem.jwtUser);
           const decode = jwtDecode(jwtToken);
-          console.log(jwtToken)
+          console.log(jwtToken);
           console.log(decode.sub);
           console.log(decode.userName);
-          console.log(decode.urlAvata)
+          console.log(decode.urlAvata);
           setUser({
             userId: decode.sub,
             userName: decode.userName,
             urlAvata: decode.urlAvata,
+            fullName: decode.fullName,
+            describe: decode.describe,
+            email: decode.email,
           });
+          await AsyncStorage.setItem(AsyncStorageItem.user,JSON.stringify(user))
           navigation.navigate('BottomTab');
         } else {
           Alert.alert('UserName hoặc mật khẩu không đúng');
@@ -178,6 +179,8 @@ export default function Login() {
               <Icon name="account-circle-outline" size={25} color={'black'} />
               <TextInput
                 style={styles.stlTextInput}
+                autoCapitalize='none'
+                autoCorrect={false}
                 placeholder="Tên đăng nhập "
                 placeholderTextColor={'#84c2f5'}
                 onChangeText={text => {
@@ -213,6 +216,7 @@ export default function Login() {
                 <TextInput
                   style={styles.stlTextInput}
                   placeholder="Mật khẩu"
+                  autoCapitalize='none'
                   placeholderTextColor={'#84c2f5'}
                   secureTextEntry={showPass}
                   onChangeText={text => {
@@ -288,7 +292,9 @@ export default function Login() {
                 <Text style={{color: 'black', fontSize: 14}}>
                   Bạn chưa có tài khoản
                 </Text>
-                <TouchableOpacity onPress={{}}>
+                <TouchableOpacity onPress={()=>{
+                  navigation.navigate("Register")
+                }}>
                   <Text
                     style={{
                       color: '#1fa5f2',

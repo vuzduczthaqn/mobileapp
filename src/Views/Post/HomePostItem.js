@@ -1,15 +1,22 @@
-// PostItem.js
-
-import React, {useEffect, useState} from 'react';
-import {View, Text, Image, TouchableOpacity, Dimensions} from 'react-native';
-import styles from './Home.styles';
+import React, {useContext, useEffect, useState} from 'react';
+import {View, Text, Image, TouchableOpacity, Dimensions, Alert} from 'react-native';
+import styles from '../HomeScreen/Home.styles';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {color} from '../../constants';
+import {useNavigation} from '@react-navigation/native';
+import Comment from '../HomeScreen/Comment';
+import {GlobalContext} from '../../context';
+import {formatDistance, formatDistanceToNowStrict} from 'date-fns';
+import vi from 'date-fns/locale/vi';
 
-const PostItem = ({item, showContent}) => {
-  const [showFull,setShowFull]=useState(false);
-  const [idPostShowFull,setIdPostShowFull]=useState([])
+const PostItem = ({item}) => {
+  const {setShowCommentScreen, showCommentScreen} = useContext(GlobalContext);
+  const {amountComment, setAmountComment} = useContext(GlobalContext);
+  const {postComment, setPostComment} = useContext(GlobalContext);
+  const {showPostSettting, setShowPostSettting} = useContext(GlobalContext);
+  const navigation = useNavigation();
+  const {user, setUser} = useContext(GlobalContext);
   return (
     <View style={styles.container}>
       <View style={styles.container}>
@@ -19,31 +26,31 @@ const PostItem = ({item, showContent}) => {
               source={{uri: item.imageProfile}}
               style={styles.profileImage}
             />
-            <Text style={styles.profileName}>{item.name}</Text>
-          </View>
-          {item.content.length != 0 && (
-            <View style={styles.textContainer}>
-              {}
-              <Text style={styles.contentText}>
-                {showFull ? item.content : `${item.content.slice(0, 12)}...`}
+            <View>
+              <Text style={styles.profileName}>{item.name}</Text>
+              <Text style={{fontSize: 14, marginLeft: 10, color: '#8f9294'}}>
+                {formatDistanceToNowStrict(new Date(item.timePost), {
+                  locale: vi,
+                  addSuffix: true,
+                })}
               </Text>
-              {item.content.length > 100 && (
-                <TouchableOpacity
-                onPress={() => {
-                  
-                }}
-                style={styles.showContentButton}>
-                <Text style={styles.buttonText}>
-                  {true ? 'Xem thêm' : 'Ẩn'}
-                </Text>
-              </TouchableOpacity>
-              
-              )}
+            </View>
+          </View>
+          {item.content && item.content.length != 0 && (
+            <View style={styles.textContainer}>
+              <Text style={styles.contentText}>{item.content}</Text>
             </View>
           )}
         </View>
         <TouchableOpacity
-          onPress={() => {}}
+          onPress={() => {
+            setShowPostSettting({
+              isShow: true,
+              userId: user.userId,
+              postId: item.id,
+              userCreatePostId: item.userIdCreatePost,
+            });
+          }}
           style={{
             width: Dimensions.get('window').width / 3,
             alignItems: 'center',
@@ -57,7 +64,7 @@ const PostItem = ({item, showContent}) => {
             color={color.home_color_text}
           />
         </TouchableOpacity>
-        {item.imageContent.length > 0 && (
+        {item.imageContent && item.imageContent.length > 0 && (
           <TouchableOpacity
             onPress={() => {
               navigation.navigate('ImageShowFull', {
@@ -97,7 +104,11 @@ const PostItem = ({item, showContent}) => {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              setShowComment(true);
+              setShowCommentScreen(true);
+              setPostComment({
+                userIdCreatePost: item.userIdCreatePost,
+                postId: item.id,
+              });
             }}
             style={{
               alignItems: 'center',
@@ -109,24 +120,30 @@ const PostItem = ({item, showContent}) => {
             />
           </TouchableOpacity>
         </View>
-        {item.postLike != 0 && item.amountComment != 0 && (
           <View style={{paddingHorizontal: 10}}>
             {item.isAmountLike != 0 && (
               <TouchableOpacity>
-                <Text style={{color: color.home_color_text}}>
+                <Text style={{color: "#636363"}}>
                   {item.isAmountLike} lượt thích
                 </Text>
               </TouchableOpacity>
             )}
-            {item.amountComment != 0 && (
-              <TouchableOpacity>
-                <Text style={{color: color.home_color_text}}>
+            {item.amountComment > 0 && (
+              <TouchableOpacity
+                onPress={() => {
+                  setShowCommentScreen(true);
+                  setPostComment({
+                    userIdCreatePost: item.userIdCreatePost,
+                    postId: item.id,
+                  });
+                  console.log(item.id);
+                }}>
+                <Text style={{color: "#636363"}}>
                   Xem tất cả {item.amountComment} bình luận
                 </Text>
               </TouchableOpacity>
             )}
           </View>
-        )}
       </View>
     </View>
   );

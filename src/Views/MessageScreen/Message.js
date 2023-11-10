@@ -15,6 +15,7 @@ import MessageItem from './MessageItem';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import {useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {color} from '../../constants';
 export default function Message(props) {
   const [message, setMessage] = useState();
   const navigation = useNavigation();
@@ -158,8 +159,8 @@ export default function Message(props) {
         ? `0${new Date().getHours()}`
         : new Date().getHours(),
       mins: new Date().getMinutes()
-      ?`0${new Date().getMinutes()}`
-      :new Date().getMinutes()
+        ? `0${new Date().getMinutes()}`
+        : new Date().getMinutes(),
     };
   }
   return (
@@ -226,12 +227,13 @@ export default function Message(props) {
         }}>
         <TextInput
           style={{
-            flex: 1,
-            backgroundColor: '#6b6b6a',
+            backgroundColor: color.color_background,
             borderRadius: 15,
-            maxHeight: 70,
+            maxHeight: 100,
             fontSize: 16,
             paddingHorizontal: 15,
+            width: '85%',
+            padding: 6,
           }}
           placeholder="Aa"
           onChangeText={text => {
@@ -241,9 +243,25 @@ export default function Message(props) {
           multiline={true}
         />
         <TouchableOpacity
-          style={{paddingEnd: 15, marginStart: 10}}
+          style={{
+            paddingEnd: 15,
+            marginStart: 10,
+            position: 'absolute',
+            bottom: 19,
+            right: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
           onPress={handleNewMessage}>
-          <MaterialCommunityIcons name="send" size={30} color={'black'} />
+          <Text
+            style={{
+              color: '#279cf5',
+              fontSize: 18,
+              fontWeight: '600',
+              alignSelf: 'center',
+            }}>
+            Gửi
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

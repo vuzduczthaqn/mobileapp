@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   Alert,
   Dimensions,
@@ -17,17 +17,16 @@ import {
 import {hoverGestureHandlerProps} from 'react-native-gesture-handler/lib/typescript/handlers/gestures/hoverGesture';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Feather from 'react-native-vector-icons/Feather';
 import {launchImageLibrary} from 'react-native-image-picker';
 import axios from 'axios';
-import {url} from '../url_request';
-import { color } from '../constants';
+import {url} from '../../url_request';
+import {color} from '../../constants';
+import {GlobalContext} from '../../context';
+import {fi} from 'date-fns/locale';
 
-export default function PostNews() {
-  const [user, setUser] = useState({
-    userId: '9',
-    urtAvata: 'https://randomuser.me/api/portraits/women/76.jpg',
-    userName: 'Vux Ducws Thangws',
-  });
+export default function PostSetting() {
+  const {user, setUser} = useContext(GlobalContext);
 
   const [post, setPost] = useState({
     content: '',
@@ -35,45 +34,14 @@ export default function PostNews() {
   });
   const [accessButton, setAccessButton] = useState(false);
   const navigation = useNavigation();
-  const openLib = () => {
-    let option = {
-      storageOptions: {
-        path: 'image',
-      },
-    };
-    launchImageLibrary(option, Response => {
-      setPost({...post, fileImage: Response.assets[0].uri});
-    });
-  };
 
-  const addPostInServer = async () => {
-    try {
-      const formData = new FormData();
-      formData.append('userId', user.userId);
-      formData.append('content', post.content);
-      formData.append('url', url.url);
-      formData.append('image', {
-        uri: post.fileImage,
-        name: post.fileImage.split('/').pop(), // Tên tệp ảnh
-        type: 'image/jpeg', // Loại tệp ảnh
-      });
-      const respone = await axios.post(url.save_post, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-    } catch (Error) {
-      console.log(Error);
-    }
-    navigation.navigate('Home');
-  };
-  useEffect(()=>{
-    if(post.content==0){
+  useEffect(() => {
+    if (post.content == 0) {
       // setAccessButton(false)
-    }else{
-      setAccessButton(true)
+    } else {
+      setAccessButton(true);
     }
-  },[post.content])
+  }, [post.content]);
   return (
     <ScrollView>
       <TouchableWithoutFeedback
@@ -84,19 +52,28 @@ export default function PostNews() {
             <TouchableOpacity
               style={styles.goBackButton}
               onPress={() => navigation.goBack()}>
-              <Icon name="arrow-left" color="black" size={25}></Icon>
+              <Feather name="x" color="black" size={25}></Feather>
             </TouchableOpacity>
-            <Text style={{color: 'black', fontSize: 18}}>Tạo bài viết</Text>
+            <Text
+              style={{
+                color: 'black',
+                fontSize: 20,
+                alignSelf: 'center',
+                marginLeft:100,
+                fontWeight:'600'
+              }}>
+              Chỉnh sửa bài viết
+            </Text>
             <View style={{flex: 1}}></View>
             {accessButton == true ? (
               <TouchableOpacity
-                style={styles.postNews}
+                style={styles.buttonNoAccess}
                 onPress={addPostInServer}>
-                <Text style={{fontSize: 18, color: 'black'}}>Đăng</Text>
+                <Text style={{fontSize: 20, color: '#0291f0',fontWeight:'500'}}>Lưu</Text>
               </TouchableOpacity>
             ) : (
               <View style={styles.buttonNoAccess}>
-                <Text style={{fontSize: 18, color: '#4c4c4d'}}>Đăng</Text>
+                <Text style={{fontSize: 18, color: '#4c4c4d',fontWeight:'500'}}>Lưu</Text>
               </View>
             )}
           </View>
@@ -111,13 +88,13 @@ export default function PostNews() {
           <View style={styles.containerInfor}>
             <Image
               source={{
-                uri: user.urtAvata,
+                uri: user.urlAvata
               }}
               style={{height: 40, width: 40, borderRadius: 25}}
             />
             <View style={{flexDirection: 'column', marginLeft: 5}}>
               <Text style={{color: 'black', fontSize: 16, fontWeight: 600}}>
-                {user.userName}
+                {user.fullName}
               </Text>
             </View>
           </View>
@@ -144,19 +121,6 @@ export default function PostNews() {
               )}
             </View>
           </View>
-          <TouchableOpacity
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexDirection: 'row',
-              marginTop: 10,
-            }}
-            onPress={openLib}>
-            <MaterialIcons name="add-to-photos" size={30} />
-            <Text style={{fontSize: 20, fontWeight: 700}}>
-              Thêm ảnh từ thư viện
-            </Text>
-          </TouchableOpacity>
         </SafeAreaView>
       </TouchableWithoutFeedback>
     </ScrollView>
@@ -172,8 +136,9 @@ const styles = StyleSheet.create({
   containerHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 10,
-    marginVertical: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    backgroundColor:"#e8eaeb"
   },
   postNews: {
     backgroundColor: 'pink',
@@ -193,12 +158,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'black',
   },
-  buttonNoAccess:{
-    backgroundColor: color.color_background,
+  buttonNoAccess: {
     height: 30,
     width: 70,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
-  }
+  },
 });

@@ -1,48 +1,96 @@
-import { Client } from '@stomp/stompjs';
-import { url } from '../url_request';
-
+import {Client} from '@stomp/stompjs';
 class WebSocketService {
-  constructor( destination, onMessageCallback, onErrorCallback) {
-    this.client = new Client({
-      brokerURL: url.socket_send_like_post,
+  constructor(url, user) {
+    this.stompClient = null;
+    this.stompConfig = {
+      brokerURL: url,
+      connectHeaders: {},
       forceBinaryWSFrames: true,
       appendMissingNULLonIncoming: true,
+      debug: function (str) {
+        console.log('STOMP: ' + str);
+      },
+      reconnectDelay: 5000,
+      onConnect: frame => {
+        console.log('WebSocket connected');
+      },
+      onStompError: frame => {
+        console.log('WebSocket error: ' + frame.body);
+      },
+    };
+    this.initializeWebSocket(user);
+  }
+
+  initializeWebSocket(user) {
+    this.stompClient = new Client(this.stompConfig);
+    this.stompClient.activate();
+  }
+
+  // Phương thức gửi comment
+  sendComment(message, callback) {
+    this.stompClient.publish({
+      destination: '/app/sender-comment',
+      body: JSON.stringify(message),
     });
-
-    this.destination = destination;
-    this.onMessageCallback = onMessageCallback;
-    this.onErrorCallback = onErrorCallback;
-
-    this.client.onConnect = frame => {
-      this.client.subscribe(this.destination, message => {
-        return message.body
-      });
-
-      if (this.onConnectCallback) {
-        this.onConnectCallback();
-      }
-    };
-
-    this.client.onStompError = frame => {
-      if (this.onErrorCallback) {
-        this.onErrorCallback('Additional details: ' + frame.body);
-      }
-    };
+  }
+  subscribeToCommentIsSendSuccess(user, callback) {
+    this.stompClient.subscribe(`/user/${user.userId}/reply`, message => {
+      const data = JSON.parse(message.body);
+      callback(data);
+    });
+  }
+  subscribeToComment(user, callback) {
+    this.stompClient.subscribe(`/user/${user.userId}/comment`, message => {
+      const data = JSON.parse(message.body);
+      callback(data);
+    });
   }
 
-  connect(onConnectCallback) {
-    this.onConnectCallback = onConnectCallback;
-    this.client.activate();
+  // Phương thức gửi like
+  sendLike(message) {
+    this.stompClient.publish({
+      destination: '/app/sender-like',
+      body: JSON.stringify(message),
+    });
   }
 
-  disconnect() {
-    this.client.deactivate();
+  // Phương thức lắng nghe like
+  subscribeToLike(callback) {
+    this.stompClient.subscribe(`/user/${user.userId}/topic/like`, message => {
+      callback(JSON.parse(message.body));
+    });
   }
 
-  send(data, action) {
-    this.client.publish({
-      destination: action,
-      body: data,
+  // Phương thức gửi tin nhắn
+  sendMessage(message) {
+    this.stompClient.publish({
+      destination: '/app/sender-message',
+      body: JSON.stringify(message),
+    });
+  }
+
+  // Phương thức lắng nghe tin nhắn
+  subscribeToMessage(callback) {
+    this.stompClient.subscribe(
+      `/user/${user.userId}/topic/message`,
+      message => {
+        callback(JSON.parse(message.body));
+      },
+    );
+  }
+
+  // Phương thức gửi lời mời kết bạn
+  sendFriend(message) {
+    this.stompClient.publish({
+      destination: '/app/sender-friend',
+      body: JSON.stringify(message),
+    });
+  }
+
+  // Phương thức lắng nghe lời mời kết bạn
+  subscribeToFriend(callback) {
+    this.stompClient.subscribe(`/user/${user.userId}/topic/friend`, message => {
+      callback(JSON.parse(message.body));
     });
   }
 }

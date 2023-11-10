@@ -7,6 +7,7 @@ import {
   View,
   Image,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import Comment from './Comment';
 import styles from './Home.styles';
@@ -17,22 +18,23 @@ import {AsyncStorageItem, url} from '../../url_request';
 import axios from 'axios';
 import {Stomp} from '@stomp/stompjs';
 import {color} from '../../constants';
-import PostItem from './HomePostItem';
+import PostItem from '../Post/HomePostItem';
 import {GlobalContext} from '../../context';
 export default function Home() {
   const navigation = useNavigation();
   const [showContent, setShowContent] = useState(false);
   const [isHeaderVisible, setHeaderVisible] = useState(true);
   const [pageCurrent, setPageCurrent] = useState(0);
+  const [pageSendDb, setPageSendDb] = useState(0);
   const [dataFromDB, setDataFromDB] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEndOfData, setIsEndOfData] = useState(false);
   const {setShowCommentScreen, showCommentScreen} = useContext(GlobalContext);
-  const { user, setUser } = useContext(GlobalContext);
+  const {user, setUser} = useContext(GlobalContext);
   const parseData = jsonData => {
     return {
       id: jsonData.idPost,
-      name: jsonData.userNameCreatePost,
+      name: jsonData.fullNameCreatePost,
       content: jsonData.content,
       imageProfile: jsonData.urlAvataCreatePost,
       imageContent: jsonData.urlImagePost,
@@ -47,23 +49,23 @@ export default function Home() {
   const loadDataFromDB = () => {
     const requestData = {
       userId: user.userId,
-      pageCurrent: pageCurrent,
+      pageCurrent: pageSendDb,
     };
-    console.log(url.get_post_data_home);
     try {
       axios
         .get(url.get_post_data_home, {
           params: requestData,
         })
         .then(response => {
-          console.log(response.data);
-          if (response.data == '') {
-            setIsLoading(false);
-            setIsEndOfData(true);
-          }
           if (response.status === 200) {
-            const parsedDataList = response.data.map(parseData);
-            setDataFromDB(prevData => [...prevData, ...parsedDataList]);
+            if (response.data.lenght != 0) {
+              const parsedDataList = response.data.map(parseData);
+              setDataFromDB(prevData => [...prevData, ...parsedDataList]);
+              setPageCurrent(pageCurrent + 1);
+            } else {
+              setIsLoading(false);
+              setIsEndOfData(true);
+            }
           } else {
             console.log(
               'Yêu cầu không thành công. Trạng thái:',
@@ -93,10 +95,11 @@ export default function Home() {
     setIsLoading(true);
     setIsEndOfData(false);
     loadDataFromDB();
-  }, [pageCurrent]);
+    setIsLoading(false);
+  }, [pageSendDb]);
 
   const renderItem = ({item, index}) => {
-    return <PostItem item={item} showContent={showContent} />;
+    return <PostItem item={item} showComment={setShowCommentScreen} />;
   };
   return (
     <GestureHandlerRootView style={{flex: 1}}>
@@ -111,7 +114,7 @@ export default function Home() {
             style={{
               fontSize: 24,
               fontWeight: 700,
-              color: color.color_text_logo_main,
+              color: "#da6df2",
             }}>
             Picky
           </Text>
@@ -143,7 +146,7 @@ export default function Home() {
           <View style={styles.AddNewPost}>
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate('Search');
+                navigation.navigate('NotificationScreen');
               }}>
               <FontAwesome5
                 name="bell"
@@ -162,17 +165,39 @@ export default function Home() {
           ListHeaderComponent={header()}
           ListFooterComponent={() => {
             if (isLoading) {
-              return <Text>Loading...</Text>;
+              return <Text style={{color:'red'}}>Loading...</Text>;
             } else if (isEndOfData) {
-              return <Text>Đã xem hết bài đăng</Text>;
+              return <Text style={{color:'red'}}>Đã xem hết bài đăng</Text>;
             }
           }}
           onEndReached={() => {
-            if (!isLoading || !isEndOfData) setPageCurrent(pageCurrent + 1);
+            if (!isLoading || !isEndOfData) {
+              setPageSendDb(pageCurrent);
+            }
           }}
-          onEndReachedThreshold={0.1}></FlatList>
+          onEndReachedThreshold={0.1}
+          onRefresh={() => {
+            setDataFromDB([]);
+            setPageCurrent(1);
+            setPageSendDb(1);
+            setPageSendDb(0);
+          }}
+          refreshing={isLoading}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={() => {
+                setDataFromDB([]);
+                setPageCurrent(1);
+                setPageSendDb(1);
+                setPageSendDb(0);
+              }}
+              colors={['blue', 'green']} // Màu sắc biểu tượng
+            />
+          }
+        />
       </View>
-      {showCommentScreen && <Comment />}
+      {/* <Comment /> */}
     </GestureHandlerRootView>
   );
   function header() {
@@ -183,7 +208,7 @@ export default function Home() {
             source={{
               uri: user.urlAvata,
             }}
-            style={{height: 35, width: 35, borderRadius: 25}}
+            style={{height: 35, width: 35, borderRadius: 25,borderWidth:1,backgroundColor:'black'}}
           />
         </TouchableOpacity>
         <TouchableOpacity
