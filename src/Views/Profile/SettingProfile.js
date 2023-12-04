@@ -24,6 +24,7 @@ export default SettingProfile = () => {
 
   const logout = async () => {
     await AsyncStorage.removeItem(AsyncStorageItem.jwtUser);
+    await AsyncStorage.removeItem(AsyncStorageItem.user)
     navigation.navigate('SplashScreen');
   };
   const [infor, setInfor] = useState();

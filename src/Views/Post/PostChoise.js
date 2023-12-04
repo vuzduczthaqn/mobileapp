@@ -15,6 +15,7 @@ import {
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import {useNavigation} from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {
   FlatList,
@@ -37,17 +38,9 @@ import {color, size} from '../../constants';
 import {GlobalContext} from '../../context';
 export default function PostChoise() {
   const translationY = useSharedValue(0);
-  const [keyboardIsShow, setKeyboardIsShow] = useState(false);
-  const {postComment, setPostComment} = useContext(GlobalContext);
-  const {user, setUser} = useContext(GlobalContext);
-  const [startGetter, setStartGetter] = useState(0);
-  const {setShowCommentScreen, showCommentScreen} = useContext(GlobalContext);
   const context = useSharedValue({y: 0});
-  const [isShowButtonSend, setIsShowButonSend] = useState(false);
-  const [commentContent, setCommentContent] = useState('');
-  const {serviceSocket, setServiceSocket} = useContext(GlobalContext);
-  const [idParentComment, setIdParentComment] = useState(null);
   const {showPostSettting, setShowPostSettting} = useContext(GlobalContext);
+  const navigation = useNavigation();
   const setShowBottomSheet = () => {
     setShowPostSettting({
       isShow: false,
@@ -88,6 +81,20 @@ export default function PostChoise() {
       transform: [{translateY: translationY.value}],
     };
   });
+
+  const delete_post = async () => {
+    try {
+      const respone = await axios.delete(url.delete_post, {
+        params: {postId: showPostSettting.postId},
+      });
+      if (respone.status === 200) {
+        scrollTo(50);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     scrollTo(-size.HEIGHT_SCREEN * 0.35);
   });
@@ -135,7 +142,12 @@ export default function PostChoise() {
                     </Text>
                   </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => {
+                    navigation.navigate('PostSetting',{postId:showPostSettting.postId});
+                    scrollTo(50);
+                  }}>
                   <FontAwesome6 name={'pencil'} size={25} color={'black'} />
                   <View style={{marginLeft: 15, justifyContent: 'center'}}>
                     <Text
@@ -144,7 +156,7 @@ export default function PostChoise() {
                     </Text>
                   </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity style={styles.button} onPress={delete_post}>
                   <AntDesign name={'delete'} size={25} color={'black'} />
                   <View style={{marginLeft: 15, justifyContent: 'center'}}>
                     <Text

@@ -1,13 +1,56 @@
-import React from 'react';
+import React, {useContext, useEffect} from 'react';
 import {Image, Text, Touchable, TouchableOpacity, View} from 'react-native';
+import {color} from '../../constants';
+import ConvertTime from '../../utils/ConvertTime';
+import {GlobalContext} from '../../context';
+
 export default function ChatItems(props) {
-  let {name, url, firstMessage, numberUnReadMessage} = props.user;
-  const {onPress} = props;
-  return <TouchableOpacity
+  let {
+    fullName,
+    idMessage,
+    idParticipant,
+    idUserSendNewMessage,
+    timeSendNewMessage,
+    urlAvatar,
+    contentMessage,
+    userId,
+    amountMessageNoRead,
+    userIdChatTogether,
+    conversationId
+  } = props.user;
+  const mappingData = responeData => {
+    return {
+      conversationId:responeData.conversationId,
+      userIdSender: responeData.userIdSender,
+      messageId: responeData.messageId,
+      timeSender: responeData.timeSender,
+      contentMessage: responeData.contentMessage,
+    };
+  };
+  const {serviceSocket, setServiceSocket} = useContext(GlobalContext);
+  const getMessageFromSocket = async () => {
+    console.log(conversationId ,'id ')
+    await serviceSocket.subscribeToMessage(conversationId, data => {
+      const newData = mappingData(data);
+      console.log(newData, 'chat');
+      onDataChange(newData)
+    });
+  };
+  useEffect(()=>{
+    getMessageFromSocket()
+  },[])
+  const { onPress, onDataChange } = props;
+  const maxLength = 25;
+  const content =
+    contentMessage.length > maxLength
+      ? contentMessage.slice(0, maxLength) + '...'
+      : contentMessage;
+  return (
+    <TouchableOpacity
       onPress={onPress}
       style={{
         height: '10',
-        paddingStart: 10,
+        paddingLeft: 10,
         paddingVertical: 7.5,
       }}>
       <View style={{flexDirection: 'row'}}>
@@ -19,34 +62,40 @@ export default function ChatItems(props) {
               resizeMode: 'cover',
               borderRadius: 50,
               marginRight: 15,
+              borderWidth: 1/4,
+              borderColor: color.black_9,
             }}
             source={{
-              uri: url,
+              uri: urlAvatar,
             }}></Image>
-          {numberUnReadMessage > 0 && (
-            <Text
-              style={{
-                backgroundColor: 'red',
-                position: 'absolute',
-                right: 10,
-                borderRadius: 25,
-                paddingHorizontal: numberUnReadMessage >= 10 ? 5 : 4,
-                fontSize: 12,
-              }}>
-              {numberUnReadMessage}
-            </Text>
-          )}
         </View>
         <View>
           <Text
             style={{
-              color: 'black',
-              fontSize:18,
+              color: color.black_9,
+              fontSize: 16,
             }}>
-            {name}
+            {fullName}
           </Text>
-          <Text style={{color: numberUnReadMessage==0?'#858585':'black'}}>{firstMessage}</Text>
+          <View style={{flexDirection: 'row', width: 270}}>
+            {userId == idUserSendNewMessage ? (
+              <Text
+                style={{color: amountMessageNoRead == 0 ? color.white_8 : 'black'}}>
+                Bạn: {contentMessage}
+              </Text>
+            ) : (
+              <Text
+                style={{color: amountMessageNoRead == 0 ? color.white_8 : 'black'}}>
+                {content}
+              </Text>
+            )}
+            <Text
+              style={{color: color.white_8,marginLeft:5}}>
+              {ConvertTime(timeSendNewMessage)}
+            </Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
+  );
 }

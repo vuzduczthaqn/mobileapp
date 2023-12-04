@@ -1,4 +1,3 @@
-import {useNavigation} from '@react-navigation/native';
 import React, {useContext, useEffect, useState} from 'react';
 import {
   Alert,
@@ -24,17 +23,49 @@ import {url} from '../../url_request';
 import {color} from '../../constants';
 import {GlobalContext} from '../../context';
 import {fi} from 'date-fns/locale';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
 export default function PostSetting() {
   const {user, setUser} = useContext(GlobalContext);
-
+  const {postId}=useRoute().params;
   const [post, setPost] = useState({
-    content: '',
-    fileImage: '',
+    content:'',
+    fileImage:''
   });
   const [accessButton, setAccessButton] = useState(false);
   const navigation = useNavigation();
-
+  const mapping=data=>{
+    return{
+      content:data.content,
+      fileImage:data.imageUrl,
+    }
+  }
+  const getPost=async()=>{
+    try {
+      const response=await axios.get(url.get_post_setting,{params:{postId:postId}})
+      if(response.status===200){
+          const newData=mapping(response.data);
+          setPost(newData);
+          console.log(newData)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  const savePost=async()=>{
+    const formData = new FormData();
+      formData.append("postId",postId);
+      formData.append("content",post.content);
+      try {
+        console.log(postId)
+        const response=await axios.post(url.update_post,formData)
+        if(response.status==200){
+          navigation.goBack();
+        }
+      } catch (error) {
+        
+      }
+  }
   useEffect(() => {
     if (post.content == 0) {
       // setAccessButton(false)
@@ -42,6 +73,9 @@ export default function PostSetting() {
       setAccessButton(true);
     }
   }, [post.content]);
+  useEffect(()=>{
+    getPost();
+  },[])
   return (
     <ScrollView>
       <TouchableWithoutFeedback
@@ -68,7 +102,8 @@ export default function PostSetting() {
             {accessButton == true ? (
               <TouchableOpacity
                 style={styles.buttonNoAccess}
-                onPress={addPostInServer}>
+                onPress={savePost}
+                >
                 <Text style={{fontSize: 20, color: '#0291f0',fontWeight:'500'}}>Lưu</Text>
               </TouchableOpacity>
             ) : (
@@ -107,6 +142,7 @@ export default function PostSetting() {
               onChangeText={text => {
                 setPost({...post, content: text});
               }}
+              value={post.content}
             />
             <View style={{marginLeft: '1%'}}>
               {post.fileImage.length > 0 && (

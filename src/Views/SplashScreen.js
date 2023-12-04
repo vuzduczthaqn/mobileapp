@@ -7,6 +7,7 @@ import jwtDecode from 'jwt-decode';
 import {GlobalContext} from '../context';
 import WebSocketService from '../utils/WebSocketServive';
 import {ImageApp} from '../constants';
+import notifee from '@notifee/react-native';
 
 const SplashScreen = () => {
   const navigation = useNavigation();
@@ -33,12 +34,7 @@ const SplashScreen = () => {
         if (isLogin == null) navigation.navigate('Choise');
         else {
           const userSave = await AsyncStorage.getItem(AsyncStorageItem.user);
-          // const decode = jwtDecode(jwtToken);
-          // console.log(jwtToken);
-          // console.log(decode.sub);
-          // console.log(decode.userName);
-          // console.log(decode.urlAvata);
-          console.log(userSave)
+          console.log(userSave, 'data');
           setUser(JSON.parse(userSave));
           navigation.navigate('BottomTab');
         }

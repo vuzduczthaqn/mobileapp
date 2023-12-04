@@ -3,12 +3,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import {
   FlatList,
   Image,
-  Pressable,
-  SafeAreaView,
-  StyleSheet,
   Text,
-  TextInput,
-  Touchable,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -18,19 +13,19 @@ import styleFriends from './Friend.style';
 import axios from 'axios';
 import {url} from '../../url_request';
 import {GlobalContext} from '../../context';
-import {it} from 'date-fns/locale';
-import {formatDistanceToNow} from 'date-fns';
-import vi from 'date-fns/locale/vi';
 import {color} from '../../constants';
+import ConvertTime from '../../utils/ConvertTime';
 export default function InvitationRecerverFriend() {
   const route = useRoute();
-  const {headerName, url, isSender} = route.params;
+  const {headerName, isSender} = route.params;
   const navigation = useNavigation();
   const {user, setUser} = useContext(GlobalContext);
   const [pageCurrentSendDB, setPageCurrentSendDB] = useState(0);
   const [listInvitationFriend, setListInvitationFriend] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEndOfData, setIsEndOfData] = useState(false);
+  const {serviceSocket, setServiceSocket} = useContext(GlobalContext);
+  
   const mappingData = data => {
     return {
       friendInvitationId: data.friendInvitationId,
@@ -38,8 +33,7 @@ export default function InvitationRecerverFriend() {
       fullName: data.fullName,
       urlAvatar: data.urlAvatar,
       amountMutualFriend: data.amountMutualFriend,
-      // timeSender: data.timeSender,
-      // isFriend: data.isFriend,
+      timeReceiver:data.timeSender,
     };
   };
   const getDataFromDB = async () => {
@@ -48,23 +42,52 @@ export default function InvitationRecerverFriend() {
       startGetter: pageCurrentSendDB,
     };
     try {
-      const respone = await axios.get(url, {
+      const respone = await axios.get(url.get_list_receiver_friend, {
         params: requestParams,
       });
       if (respone.status === 200) {
         const newData = respone.data.map(mappingData);
-        console.log(newData);
+        console.log(newData,'hehe');
         setListInvitationFriend(prev => [...prev, ...newData]);
       }
     } catch (error) {
       console.log(error);
     }
   };
+
+  const mappingDataFromSocket=data=>{
+    return {
+      friendInvitationId: data.FriendId,
+      userId: data.userIdSender,
+      fullName: data.fullName,
+      urlAvatar: data.urlAvatar,
+      amountMutualFriend: data.amountMutualFriend,
+      timeReceiver:data.timeSender,
+    };
+  }
+  const subscribeFriendshipRequest=()=>{
+    serviceSocket.subscribeToFriend(user,data=>{
+      const newData=mappingDataFromSocket(data)
+      console.log(newData);
+      setListInvitationFriend(prev=>[newData,...prev]);
+    })
+  }
+  const accept_invitation=async (friendId)=>{
+    try {
+      const formData=new FormData();
+      formData.append('friendId',friendId);
+      await axios.post(url.accept_invitation,formData);
+      
+    } catch (error) {
+      console.log(error);
+    }
+  }
   useEffect(() => {
     setIsLoading(true);
     setIsEndOfData(false);
     getDataFromDB();
     setIsLoading(false);
+    subscribeFriendshipRequest();
   }, []);
   const renderItem = ({item, index}) => {
     return (
@@ -77,13 +100,20 @@ export default function InvitationRecerverFriend() {
             />
           </View>
           <View style={styleFriends.containerContentText}>
-            <Text style={styleFriends.nameItem}>{item.fullName}</Text>
+            <View>
+             <Text style={styleFriends.nameItem}>{item.fullName}</Text>
+            <Text style={styleFriends.timeReceiver}>{ConvertTime(item.timeReceiver)}</Text> 
+            </View>
+            
             <TouchableOpacity
+              onPress={()=>{
+                accept_invitation(item.friendInvitationId)
+            }}
               style={[
                 styleFriends.ButtonSendBD,
                 {backgroundColor: color.color_background},
               ]}>
-              <Text style={{fontSize: 12, color: 'black'}}>Xóa</Text>
+              <Text style={{fontSize: 12, color: 'black'}}>Chấp nhận</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -118,7 +148,7 @@ export default function InvitationRecerverFriend() {
             {headerName}
           </Text>
         </View>
-        {listInvitationFriend.lenght > 0 ? (
+        {listInvitationFriend.length > 0 ? (
           <FlatList
             data={listInvitationFriend}
             keyExtractor={item => item.friendInvitationId}

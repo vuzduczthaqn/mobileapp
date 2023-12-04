@@ -20,6 +20,8 @@ const styleFriends = StyleSheet.create({
   },
   buttonItem: {
     padding: 5,
+    marginVertical:5,
+    marginHorizontal:5,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -38,14 +40,17 @@ const styleFriends = StyleSheet.create({
     justifyContent:'center'
   },
   ButtonSendBD: {
-    marginRight: 10,
     padding: 10,
     width: 100,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
     position:'absolute',
-    right:20,
+    right:15,
   },
+  timeReceiver:{
+    fontSize:12,
+    color:color.white_8
+  }
 });
 export default styleFriends;

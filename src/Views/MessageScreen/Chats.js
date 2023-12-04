@@ -1,10 +1,11 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {
   Alert,
   FlatList,
   Image,
   ScrollView,
   Text,
+  TextInput,
   Touchable,
   TouchableOpacity,
   View,
@@ -17,20 +18,88 @@ import axios from 'axios';
 import {url} from '../../url_request';
 export default function Chats() {
   const navigation = useNavigation();
-  const [chatListUsers, setChatListUsers] = useState([]);
   const [listUserHeader, setListUserHeader] = useState([]);
   const {user, setUser} = useContext(GlobalContext);
   const [pageCurrent, setPageCurrent] = useState(0);
   const [pageSendDb, setPageSendDb] = useState(0);
+  const [listChatUser, setListChatUser] = useState([]);
+  const {serviceSocket, setServiceSocket} = useContext(GlobalContext);
+  const [newDataFromSocket,setNewDataFromSocket]=useState('');
+  // const [chatListState, setChatListState] = useState({
+  //   dataIdsList: [],
+  //   dataById: {},
+  // });
+  // const mappingChatList = (data) => {
+  //   const result = {
+  //     dataIdsList: [],
+  //     dataById: {}
+  //   };
 
+  //   data.forEach((item) => {
+  //     const id = item.userId.toString();
+  //     result.dataIdsList.push(id);
+  //     result.dataById[id] = {
+  //       fullName: item.fullName,
+  //       idMessage: item.idMessage,
+  //       idParticipant: item.idParticipant,
+  //       idUserSendNewMessage: item.idUserSendNewMessage,
+  //       timeSendNewMessage: item.timeSendNewMessage,
+  //       urlAvatar: item.urlAvatar,
+  //       contentMessage: item.contentMessage,
+  //     };
+  //   });
+
+  //   return result;
+  // };
+  const mappingChatUser = item => {
+    return {
+      fullName: item.fullName,
+      idMessage: item.idMessage,
+      idParticipant: item.idParticipant,
+      idUserSendNewMessage: item.idUserSendNewMessage,
+      timeSendNewMessage: item.timeSendNewMessage,
+      urlAvatar: item.urlAvatar,
+      contentMessage: item.contentMessage,
+      userIdChatTogether:item.userId,
+      amountMessageNoRead:item.amountMessageNoRead,
+      conversationId:item.conversationId,
+      userId:user.userId,
+      avatarUserChat:user.urlAvata
+    };
+  };
+  const updateListChatUser =useCallback (newData => {
+    console.log("co hoat dong nha ")
+    setListChatUser((prevList) => {
+      const updatedList = prevList.map((item) => {
+        if (item.conversationId == newData.conversationId) {
+          return {
+            ...item,
+            idUserSendNewMessage: newData.userIdSender,
+            idMessage: newData.messageId,
+            timeSendNewMessage: newData.timeSender,
+            contentMessage: newData.contentMessage,
+            amountMessageNoRead: (item.amountMessageNoRead || 0) + 1,
+          };
+        }
+        return item;
+      });
+      console.log(updatedList,"lít ne")
+      return updatedList;
+    });
+  },[setListChatUser])
   const getChatListUsers = async () => {
     const requestData = {
       userId: user.userId,
       startGetter: pageSendDb,
     };
     try {
-      const reponse = await axios.get(url, {params: requestData});
-      if (reponse.status === 200) {
+      const response = await axios.get(url.get_list_chat_user, {
+        params: requestData,
+      });
+      if (response.status === 200) {
+        const newData=response.data.map(mappingChatUser)
+        console.log(newData,'hhehehe')
+        setListChatUser(prev=>[...prev,...newData])
       }
     } catch (error) {
       console.log(error);
@@ -63,100 +132,35 @@ export default function Chats() {
       console.log(error);
     }
   };
-  const [users, setUsers] = useState([
-    {
-      url: 'https://randomuser.me/api/portraits/men/7.jpg',
-      name: 'masjd',
-      firstMessage: 'hello p1',
-      numberUnReadMessage: 1,
-    },
-    {
-      url: 'https://randomuser.me/api/portraits/men/22.jpg',
-      name: 'jaja',
-      firstMessage: 'hello p2',
-      numberUnReadMessage: 0,
-    },
-    {
-      url: 'https://randomuser.me/api/portraits/men/45.jpg',
-      name: 'japed',
-      firstMessage: 'hello p3',
-      numberUnReadMessage: 12,
-    },
-    {
-      url: 'https://randomuser.me/api/portraits/women/76.jpg',
-      name: 'vera',
-      firstMessage: 'hello p4',
-      numberUnReadMessage: 0,
-    },
-    {
-      url: 'https://randomuser.me/api/portraits/women/80.jpg',
-      name: 'Nata',
-      firstMessage: 'hello p5',
-      numberUnReadMessage: 4,
-    },
-    {
-      url: 'https://randomuser.me/api/portraits/men/45.jpg',
-      name: 'japed',
-      firstMessage: 'hello p3',
-      numberUnReadMessage: 12,
-    },
-    {
-      url: 'https://randomuser.me/api/portraits/women/76.jpg',
-      name: 'vera',
-      firstMessage: 'hello p4',
-      numberUnReadMessage: 0,
-    },
-    {
-      url: 'https://randomuser.me/api/portraits/women/80.jpg',
-      name: 'Nata',
-      firstMessage: 'hello p5',
-      numberUnReadMessage: 4,
-    },
-    {
-      url: 'https://randomuser.me/api/portraits/men/45.jpg',
-      name: 'japed',
-      firstMessage: 'hello p3',
-      numberUnReadMessage: 12,
-    },
-    {
-      url: 'https://randomuser.me/api/portraits/women/76.jpg',
-      name: 'vera',
-      firstMessage: 'hello p4',
-      numberUnReadMessage: 0,
-    },
-    {
-      url: 'https://randomuser.me/api/portraits/women/80.jpg',
-      name: 'Nata',
-      firstMessage: 'hello p5',
-      numberUnReadMessage: 4,
-    },
-    {
-      url: 'https://randomuser.me/api/portraits/men/45.jpg',
-      name: 'japed',
-      firstMessage: 'hello p3',
-      numberUnReadMessage: 12,
-    },
-    {
-      url: 'https://randomuser.me/api/portraits/women/76.jpg',
-      name: 'vera',
-      firstMessage: 'hello p4',
-      numberUnReadMessage: 0,
-    },
-    {
-      url: 'https://randomuser.me/api/portraits/women/80.jpg',
-      name: 'Nata',
-      firstMessage: 'hello p5',
-      numberUnReadMessage: 4,
-    },
-  ]);
-  useEffect(() => {
+
+  const mappingData = responeData => {
+    return {
+      conversationId:responeData.conversationId,
+      userIdSender: responeData.userIdSender,
+      messageId: responeData.messageId,
+      timeSender: responeData.timeSender,
+      contentMessage: responeData.contentMessage,
+    };
+  };
+  const getMessageFromSocket = () => {
+    // serviceSocket.subscribeToMessage(user.conversationId, data => {
+    //   const newData = mappingData(data);
+    //   console.log(newData, 'chat');
+    //   updateListChatUser(newData)
+    // });
+  };
+
+  
+  useEffect(() => {getMessageFromSocket();
+    getChatListUsers();
     getListUserHeader();
+    
   }, []);
   const renderItem = ({item, index}) => {
-    const maxLength = 14; // Độ dài tối đa bạn muốn cắt
+    const maxLength = 14;
     const fullName =
       item.fullName.length > maxLength
-        ? item.fullName.slice(0, maxLength)+'...'
+        ? item.fullName.slice(0, maxLength) + '...'
         : item.fullName;
     return (
       <TouchableOpacity
@@ -167,12 +171,12 @@ export default function Chats() {
         <Image
           source={{uri: item.urlAvatar}}
           style={{
-            height: 60,
-            width: 60,
+            height: 50,
+            width: 50,
             borderRadius: 50,
             marginHorizontal: 7.5,
-            borderWidth:1/2,
-            borderColor:'pink'
+            borderWidth: 1 / 2,
+            borderColor: 'pink',
           }}
         />
         <View
@@ -206,7 +210,7 @@ export default function Chats() {
         </Text>
       </View>
       <FlatList
-        data={users}
+        data={listChatUser}
         ListHeaderComponent={header()}
         renderItem={({item}) => (
           <ChatItems
@@ -214,8 +218,9 @@ export default function Chats() {
               navigation.navigate('Messages', {user: item});
             }}
             user={item}
-            key={item.name}
-            keyExtractor={item => item.url}
+            key={item.userId}
+            keyExtractor={item => item.userId}
+            onDataChange={updateListChatUser}
           />
         )}
       />
@@ -236,7 +241,7 @@ export default function Chats() {
             onPress={() => {
               navigation.navigate('PostNews');
             }}>
-            <Text style={{color: '#636663'}}>Tìm kiếm</Text>
+            <TextInput style={{color: '#636663'}}>Tìm kiếm</TextInput>
           </TouchableOpacity>
         </View>
         <FlatList

@@ -1,7 +1,16 @@
 import React from 'react';
 import {Image, Text, Touchable, TouchableOpacity, View} from 'react-native';
 export default function MessageItem(props) {
-  let {urlSender, isSender, message, timestand} = props.item;
+  let {
+    userIdSender,
+    messageId,
+    timeSender,
+    contentMessage,
+    avatar,
+    avatarUserChat,
+    userIdChatTogether,
+    userId
+  } = props.item;
   const {onPress} = props;
   return (
     <TouchableOpacity
@@ -11,15 +20,15 @@ export default function MessageItem(props) {
         paddingStart: 10,
         paddingVertical: 12,
       }}>
-      {isSender ? (
+      {userId!=userIdSender ? (
         <View style={{flexDirection: 'row', alignItems: 'flex-end'}}>
           <Image
-            source={{uri: urlSender}}
+            source={{uri: avatarUserChat}}
             style={{
               height: 20,
               width: 20,
               borderRadius: 25,
-              marginBottom:4,
+              marginBottom: 4,
             }}
           />
           <Text
@@ -32,7 +41,7 @@ export default function MessageItem(props) {
               borderRadius: 10,
               maxWidth: '70%',
             }}>
-            {message}
+            {contentMessage}
           </Text>
         </View>
       ) : (
@@ -51,10 +60,10 @@ export default function MessageItem(props) {
               paddingVertical: 5,
               borderRadius: 10,
             }}>
-            {message}
+            {contentMessage}
           </Text>
           <Image
-            source={{uri: urlSender}}
+            source={{uri: avatar}}
             style={{height: 20, width: 20, borderRadius: 25}}
           />
         </View>

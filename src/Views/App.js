@@ -30,6 +30,9 @@ import PostDetail from './Post/PostDetail';
 import ChangeAvatar from './Profile/ChangeAvatar';
 import ChangeInforUser from './Profile/ChangeInforUser';
 import ChangeDataDetail from './Profile/ChangeDataDetail';
+import PostSetting from './Post/PostSettingScreen';
+import NewPost from './Post/NewPost';
+import notifee from '@notifee/react-native';
 const Stack = createNativeStackNavigator();
 export default function App() {
   return (
@@ -52,6 +55,7 @@ export default function App() {
             <Stack.Screen name="Messages" component={Message} />
             <Stack.Screen name="MessageItem" component={MessageItem} />
             <Stack.Screen name="PostNews" component={PostNews} />
+            <Stack.Screen name="NewPost" component={NewPost} />
             <Stack.Screen name="Friend" component={Friend} />
             <Stack.Screen name="Setting" component={Setting} />
             <Stack.Screen name="test" component={test} />
@@ -66,6 +70,7 @@ export default function App() {
             <Stack.Screen name="ChangeAvatar" component={ChangeAvatar}/>
             <Stack.Screen name="ChangeInforUser" component={ChangeInforUser}/>
             <Stack.Screen name="ChangeDataDetail" component={ChangeDataDetail}/>
+            <Stack.Screen name='PostSetting' component={PostSetting}/>
           </Stack.Navigator>
         </NavigationContainer>
     </GlobalState>

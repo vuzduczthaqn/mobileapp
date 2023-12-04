@@ -5,14 +5,10 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {color} from '../../constants';
 import {useNavigation} from '@react-navigation/native';
-import Comment from '../HomeScreen/Comment';
 import {GlobalContext} from '../../context';
-import {formatDistance, formatDistanceToNowStrict} from 'date-fns';
-import vi from 'date-fns/locale/vi';
-
-const PostItem = ({item}) => {
+import ConvertTime from '../../utils/ConvertTime';
+const PostItem = ({item,isLikePost}) => {
   const {setShowCommentScreen, showCommentScreen} = useContext(GlobalContext);
-  const {amountComment, setAmountComment} = useContext(GlobalContext);
   const {postComment, setPostComment} = useContext(GlobalContext);
   const {showPostSettting, setShowPostSettting} = useContext(GlobalContext);
   const navigation = useNavigation();
@@ -29,10 +25,8 @@ const PostItem = ({item}) => {
             <View>
               <Text style={styles.profileName}>{item.name}</Text>
               <Text style={{fontSize: 14, marginLeft: 10, color: '#8f9294'}}>
-                {formatDistanceToNowStrict(new Date(item.timePost), {
-                  locale: vi,
-                  addSuffix: true,
-                })}
+                {ConvertTime(item.timePost)}
+                  
               </Text>
             </View>
           </View>
@@ -86,7 +80,11 @@ const PostItem = ({item}) => {
           }}>
           <TouchableOpacity
             onPress={() => {
-              item.postLike = item.postLike + 1;
+              const data={
+                id:item.id,
+                isLikePost:item.isLikePost
+              }
+              isLikePost(data);
             }}
             style={{
               alignItems: 'center',
@@ -148,5 +146,4 @@ const PostItem = ({item}) => {
     </View>
   );
 };
-
 export default PostItem;

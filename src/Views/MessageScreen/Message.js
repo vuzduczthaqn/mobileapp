@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import {
   Alert,
   FlatList,
@@ -13,156 +13,110 @@ import {
 } from 'react-native';
 import MessageItem from './MessageItem';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {color} from '../../constants';
+import axios from 'axios';
+import {url} from '../../url_request';
+import {GlobalContext} from '../../context';
 export default function Message(props) {
   const [message, setMessage] = useState();
   const navigation = useNavigation();
-  const {url, name} = {
-    url: 'https://randomuser.me/api/portraits/women/76.jpg',
-    name: 'vu duc thang',
-  };
-  const [chatHistory, setChatHistory] = useState([
-    {
-      urlSender: url,
-      isSender: true,
-      message: 'hello',
-      timestand: 1693736220,
-    },
+  const [chatHistory, setChatHistory] = useState([]);
+  const [startGetter, setStartGetter] = useState(0);
+  const {serviceSocket, setServiceSocket} = useContext(GlobalContext);
+  const flatListRef = useRef(null);
+  const route = useRoute();
+  let {user} = route.params;
 
-    {
-      urlSender: url,
-      isSender: true,
-      message: "I'm fine",
-      timestand: 1693736420,
-    },
-    {
-      urlSender: url,
-      isSender: true,
-      message:
-        'And youaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-      timestand: 1693736430,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'hello',
-      timestand: 1693736250,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'how are you',
-      timestand: 1693736350,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'hello',
-      timestand: 1693736250,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'how are you',
-      timestand: 1693736350,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'hello',
-      timestand: 1693736250,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'how are you',
-      timestand: 1693736350,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'hello',
-      timestand: 1693736250,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'how are you',
-      timestand: 1693736350,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'hello',
-      timestand: 1693736250,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'how are you',
-      timestand: 1693736350,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'hello',
-      timestand: 1693736250,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'how are you',
-      timestand: 1693736350,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'hello',
-      timestand: 1693736250,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'how are you',
-      timestand: 1693736350,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'hello',
-      timestand: 1693736250,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'how are you',
-      timestand: 1693736350,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'hello',
-      timestand: 1693736250,
-    },
-    {
-      urlSender: 'https://randomuser.me/api/portraits/women/76.jpg',
-      isSender: false,
-      message: 'how are you',
-      timestand: 1693736350,
-    },
-  ]);
-  function handleNewMessage() {
-    const timeSend = {
-      hr: new Date().getHours()
-        ? `0${new Date().getHours()}`
-        : new Date().getHours(),
-      mins: new Date().getMinutes()
-        ? `0${new Date().getMinutes()}`
-        : new Date().getMinutes(),
+  const mappingData = responeData => {
+    return {
+      userIdSender: responeData.userIdSender,
+      messageId: responeData.messageId,
+      timeSender: responeData.timeSender,
+      contentMessage: responeData.contentMessage,
     };
+  };
+  const getListHistoryChat = async () => {
+    const dataRequest = {
+      conversationId: user.conversationId,
+      startGetter: startGetter,
+    };
+    try {
+      const response = await axios.get(url.get_list_chat_history, {
+        params: dataRequest,
+      });
+      if (response.status === 200) {
+        const newData = response.data.map(mappingData);
+        setChatHistory(prev => [...prev, ...newData]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const sendMessage = () => {
+    const dataRequest = {
+      messageContent: message,
+      userIdSend: user.userId,
+      userIdReceiver: user.userIdChatTogether,
+      conversationId: user.conversationId,
+    };
+    serviceSocket.sendMessage(dataRequest);
+    setMessage('');
+  };
+  const getMessageReply = () => {
+    // serviceSocket.subscribeToMessageIsSendSuccess(user.userId, data => {
+    //   const newData = mappingData(data);
+    //   console.log(newData, 'data tra sau khi gui');
+    //   setChatHistory(prev => [newData, ...prev]);
+    // });
+  };
+  const getMessageFormSocket = () => {
+    serviceSocket.subscribeToMessage(user.conversationId, data => {
+      const newData = mappingData(data);
+      console.log(newData, 'new data');
+      setChatHistory(prev => [newData, ...prev]);
+    });
+  };
+  useEffect(() => {
+    getListHistoryChat();
+    getMessageFormSocket();
+    getMessageReply();
+    flatListRef.current.scrollToEnd({animated: true});
+    const index = chatHistory.length - 1;
+  }, [user.conversationId]);
+
+  const getItemLayout = (chatHistory, index) => ({
+    length: 50,
+    offset: 50 * index,
+    index,
+  });
+  function header() {
+    return (
+      <View
+        style={{
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <Image
+          style={{
+            height: 60,
+            width: 60,
+            borderRadius: 100,
+          }}
+          source={{uri: user.urlAvatar}}
+        />
+        <View style={{marginHorizontal: 10}}>
+          <Text style={{color: 'black', fontSize: 16}}>{user.fullName}</Text>
+          <Text style={{color: 'black', fontSize: 12}}></Text>
+        </View>
+        <TouchableOpacity>
+          <Text>Xem trang cá nhân</Text>
+        </TouchableOpacity>
+      </View>
+    );
   }
+  function handleNewMessage() {}
   return (
     <View
       style={{
@@ -170,28 +124,13 @@ export default function Message(props) {
         height: '100%',
         width: '100%',
       }}>
-      <View style={{flex: 90}}></View>
-      <FlatList
-        style={{}}
-        data={chatHistory}
-        renderItem={({item}) => (
-          <MessageItem
-            onPress={() => {
-              Alert.alert('you press item');
-            }}
-            item={item}
-            key={`${item.timestand}`}
-          />
-        )}
-      />
       <View
         style={{
-          flex: 10,
           flexDirection: 'row',
-          position: 'absolute',
-          top: 0,
           backgroundColor: 'white',
-          paddingVertical: 10,
+          paddingVertical: 7.5,
+          borderWidth: 1 / 2,
+          borderColor: color.white_8,
         }}>
         <TouchableOpacity
           style={{justifyContent: 'center', paddingHorizontal: 20}}
@@ -207,17 +146,39 @@ export default function Message(props) {
               width: 40,
               borderRadius: 25,
             }}
-            source={{uri: url}}
+            source={{uri: user.urlAvatar}}
           />
           <View style={{marginHorizontal: 10}}>
-            <Text style={{color: 'black', fontSize: 16}}>{name}</Text>
-            <Text style={{color: 'black', fontSize: 12}}>
-              Hoatj động 10p trước
-            </Text>
+            <Text style={{color: 'black', fontSize: 16}}>{user.fullName}</Text>
+            <Text style={{color: 'black', fontSize: 12}}></Text>
           </View>
         </TouchableOpacity>
         <View style={{flex: 1}}></View>
       </View>
+      <View style={{flex: 90}}></View>
+      <FlatList
+        data={chatHistory}
+        ref={flatListRef}
+        ListFooterComponent={header()}
+        inverted={true}
+        etItemLayout={getItemLayout}
+        renderItem={({item}) => (
+          <MessageItem
+            onPress={() => {}}
+            item={{
+              userIdSender: item.userIdSender,
+              messageId: item.messageId,
+              timeSender: item.TimeSender,
+              contentMessage: item.contentMessage,
+              avatar: user.urlAvatar,
+              avatarUserChat: user.avatarUserChat,
+              userIdChatTogether: user.userIdChatTogether,
+              userId: user.userId,
+            }}
+            key={`${item.messageId}`}
+          />
+        )}
+      />
       <View
         style={{
           flexDirection: 'row',
@@ -252,7 +213,7 @@ export default function Message(props) {
             justifyContent: 'center',
             alignItems: 'center',
           }}
-          onPress={handleNewMessage}>
+          onPress={sendMessage}>
           <Text
             style={{
               color: '#279cf5',
@@ -267,6 +228,7 @@ export default function Message(props) {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   scrollContainer: {
     width: 200,

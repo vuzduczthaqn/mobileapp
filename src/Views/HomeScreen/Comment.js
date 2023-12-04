@@ -237,7 +237,7 @@ export default function Comment() {
           <Animated.View
             style={[styles.bottomSheetContainer, rBottomSheetStyle]}>
             <View style={{marginVertical: 10}}>
-              <Text style={styles.containerHederComment}>30 bình luận</Text>
+              <Text style={styles.containerHederComment}>Bình luận</Text>
               <View
                 style={{
                   height: 2,

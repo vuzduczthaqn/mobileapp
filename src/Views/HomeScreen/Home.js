@@ -1,4 +1,10 @@
-import React, {useContext, useEffect, useRef, useState} from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   Dimensions,
   FlatList,
@@ -29,6 +35,7 @@ export default function Home() {
   const [dataFromDB, setDataFromDB] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEndOfData, setIsEndOfData] = useState(false);
+  const {serviceSocket, setServiceSocket} = useContext(GlobalContext);
   const {setShowCommentScreen, showCommentScreen} = useContext(GlobalContext);
   const {user, setUser} = useContext(GlobalContext);
   const parseData = jsonData => {
@@ -77,20 +84,31 @@ export default function Home() {
       console.log('Lỗi:', error);
     }
   };
-  const sendLikePost = () => {
-    const StompConfig = {
-      reconnectDelay: 5000,
-      heartbeatIncoming: 4000,
-      heartbeatOutgoing: 4000,
+  const sendLikePost = data=> {
+    const dataRequest = {
+      postId:data.id,
+      userId:user.userId,
+      isLikePost:data.isLikePost,
     };
-    const stompSocket = Stomp.over(
-      () => new WebSocket(url.socket_send_like_post),
-      StompConfig,
-    );
-    const connect = stompSocket.connect(() => {
-      console.log('onconnectted');
+    serviceSocket.sendLike(dataRequest);
+  }
+  const upDateListPostIsLike = useCallback(newData => {
+    sendLikePost(newData)
+    setDataFromDB(prevList => {
+      const upDateList = prevList.map(item => {
+        if (item.id === newData.id) {
+          return {
+            ...item,
+            isAmountLike: !item.isLikePost==1?item.isAmountLike+1:item.isAmountLike-1,
+            isLikePost: newData.isLikePost==1?0:1,
+          };
+        }
+        return item;
+      });
+      return upDateList;
     });
-  };
+  },[setDataFromDB]);
+  
   useEffect(() => {
     setIsLoading(true);
     setIsEndOfData(false);
@@ -99,7 +117,13 @@ export default function Home() {
   }, [pageSendDb]);
 
   const renderItem = ({item, index}) => {
-    return <PostItem item={item} showComment={setShowCommentScreen} />;
+    return (
+      <PostItem
+        item={item}
+        showComment={setShowCommentScreen}
+        isLikePost={upDateListPostIsLike}
+      />
+    );
   };
   return (
     <GestureHandlerRootView style={{flex: 1}}>
@@ -114,7 +138,7 @@ export default function Home() {
             style={{
               fontSize: 24,
               fontWeight: 700,
-              color: "#da6df2",
+              color: '#da6df2',
             }}>
             Picky
           </Text>
@@ -165,9 +189,9 @@ export default function Home() {
           ListHeaderComponent={header()}
           ListFooterComponent={() => {
             if (isLoading) {
-              return <Text style={{color:'red'}}>Loading...</Text>;
+              return <Text style={{color: 'red'}}>Loading...</Text>;
             } else if (isEndOfData) {
-              return <Text style={{color:'red'}}>Đã xem hết bài đăng</Text>;
+              return <Text style={{color: 'red'}}>Đã xem hết bài đăng</Text>;
             }
           }}
           onEndReached={() => {
@@ -208,7 +232,13 @@ export default function Home() {
             source={{
               uri: user.urlAvata,
             }}
-            style={{height: 35, width: 35, borderRadius: 25,borderWidth:1,backgroundColor:'black'}}
+            style={{
+              height: 35,
+              width: 35,
+              borderRadius: 25,
+              borderWidth: 1,
+              backgroundColor: 'black',
+            }}
           />
         </TouchableOpacity>
         <TouchableOpacity

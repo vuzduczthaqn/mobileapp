@@ -45,6 +45,30 @@ class WebSocketService {
       callback(data);
     });
   }
+  // Phương thức gửi tin nhắn
+  sendMessage(message) {
+    this.stompClient.publish({
+      destination: '/app/sender-message',
+      body: JSON.stringify(message),
+    });
+  }
+
+  // Phương thức lắng nghe tin nhắn
+  subscribeToMessage(userId,callback) {
+    this.stompClient.subscribe(
+      `/user/${userId}/message`,
+      message => {
+        console.log(message.body)
+        callback(JSON.parse(message.body));
+      },
+    );
+  }
+  subscribeToMessageIsSendSuccess(userId, callback) {
+    this.stompClient.subscribe(`/user/${userId}/reply-message`, message => {
+      const data = JSON.parse(message.body);
+      callback(data);
+    });
+  }
 
   // Phương thức gửi like
   sendLike(message) {
@@ -55,29 +79,13 @@ class WebSocketService {
   }
 
   // Phương thức lắng nghe like
-  subscribeToLike(callback) {
+  subscribeToLike(callback,user) {
     this.stompClient.subscribe(`/user/${user.userId}/topic/like`, message => {
       callback(JSON.parse(message.body));
     });
   }
 
-  // Phương thức gửi tin nhắn
-  sendMessage(message) {
-    this.stompClient.publish({
-      destination: '/app/sender-message',
-      body: JSON.stringify(message),
-    });
-  }
-
-  // Phương thức lắng nghe tin nhắn
-  subscribeToMessage(callback) {
-    this.stompClient.subscribe(
-      `/user/${user.userId}/topic/message`,
-      message => {
-        callback(JSON.parse(message.body));
-      },
-    );
-  }
+  
 
   // Phương thức gửi lời mời kết bạn
   sendFriend(message) {
@@ -88,8 +96,13 @@ class WebSocketService {
   }
 
   // Phương thức lắng nghe lời mời kết bạn
-  subscribeToFriend(callback) {
-    this.stompClient.subscribe(`/user/${user.userId}/topic/friend`, message => {
+  subscribeToFriend(user,callback) {
+    this.stompClient.subscribe(`/user/${user.userId}/friend`, message => {
+      callback(JSON.parse(message.body));
+    });
+  }
+  subscribeToNotification(user,callback) {
+    this.stompClient.subscribe(`/user/${user.userId}/friend`, message => {
       callback(JSON.parse(message.body));
     });
   }

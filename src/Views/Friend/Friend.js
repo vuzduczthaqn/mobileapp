@@ -29,6 +29,7 @@ export default function Friend() {
   const [listInvitationFriend, setListInvitationFriend] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEndOfData, setIsEndOfData] = useState(false);
+  const {serviceSocket, setServiceSocket} = useContext(GlobalContext);
   const mappingData = data => {
     return {
       friendInvitationId: data.friendInvitationId,
@@ -58,6 +59,7 @@ export default function Friend() {
       console.log(error);
     }
   };
+
   useEffect(() => {
     setIsLoading(true);
     setIsEndOfData(false);
@@ -151,7 +153,6 @@ export default function Friend() {
             onPress={()=>{
               navigation.navigate('InvitationRecerverFriend', {
                 headerName: 'Lời mời kết bạn',
-                url: url.get_list_receiver_friend,
                 isSender: false
               });
             }}>
